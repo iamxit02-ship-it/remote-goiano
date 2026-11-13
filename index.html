@@ -25,8 +25,8 @@
         .status-disconnected { background: rgba(239, 68, 68, 0.15); color: var(--red); border: 1px solid var(--red); }
         .status-connected { background: rgba(34, 197, 94, 0.15); color: var(--green); border: 1px solid var(--green); }
 
-        input, button { width: 100%; padding: 0.75rem; margin-top: 0.75rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 1rem; outline: none; }
-        input:focus { border-color: var(--accent); }
+        input, button, select { width: 100%; padding: 0.75rem; margin-top: 0.75rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 1rem; outline: none; }
+        input:focus, select:focus { border-color: var(--accent); }
         button { background: var(--accent); color: var(--bg); font-weight: bold; cursor: pointer; border: none; transition: opacity 0.2s; }
         button:hover { opacity: 0.9; }
 
@@ -40,6 +40,9 @@
         .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: var(--text); transition: .3s; border-radius: 50%; }
         input:checked + .slider { background-color: var(--accent); }
         input:checked + .slider:before { transform: translateX(22px); }
+        
+        .control-group { margin-top: 1rem; text-align: left; font-size: 0.9rem; }
+        .control-group label { color: var(--muted); display: block; margin-bottom: 0.25rem; }
     </style>
 </head>
 <body>
@@ -47,32 +50,36 @@
     <div class="box">
         <div id="connectionScreen">
             <h2>Remote Goiano</h2>
-            <div id="proxyStatus" class="status-badge status-disconnected">Aguardando Túnel Proxy</div>
+            <div id="proxyStatus" class="status-badge status-disconnected">Aguardando Conexão</div>
             <p style="color: var(--muted); font-size: 0.85rem; margin-bottom: 1rem;">Insira sua Key de acesso:</p>
             <input type="text" id="accessKey" placeholder="Cole sua Key aqui...">
-            <button onclick="checkProxyAndLogin()">Entrar no Painel</button>
+            <button onclick="checkLogin()">Conectar Painel</button>
         </div>
 
         <div id="dashboardPanel" class="hidden">
             <h2>Mogado Sports Core</h2>
-            <div class="status-badge status-connected" style="margin-top: 0.5rem;">Túnel Sincronizado</div>
+            <div class="status-badge status-connected" style="margin-top: 0.5rem;">Remote Sincronizado</div>
             
             <div class="feature-grid">
                 <div class="feature-item">
                     <span>Aimbot FOV</span>
-                    <label class="switch"><input type="checkbox" onchange="sendProxyCommand('Aimbot FOV', this)"><span class="slider"></span></label>
+                    <label class="switch"><input type="checkbox" id="aimbotToggle" onchange="sendRemoteCommand('Aimbot', this.checked)"><span class="slider"></span></label>
+                </div>
+                <div class="control-group">
+                    <label>Tamanho do FOV</label>
+                    select id="fovSize" onchange="sendRemoteCommand('FOV_Size', this.value)">
+                        <option value="baixo">Baixo</option>
+                        <option value="medio">Médio</option>
+                        <option value="alto">Alto</option>
+                    </select>
                 </div>
                 <div class="feature-item">
-                    <span>ESP Box</span>
-                    <label class="switch"><input type="checkbox" onchange="sendProxyCommand('ESP Box', this)"><span class="slider"></span></label>
+                    <span>ESP Chams (Laranja)</span>
+                    <label class="switch"><input type="checkbox" id="chamsToggle" onchange="sendRemoteCommand('Chams', this.checked)"><span class="slider"></span></label>
                 </div>
                 <div class="feature-item">
-                    <span>ESP Line</span>
-                    <label class="switch"><input type="checkbox" onchange="sendProxyCommand('ESP Line', this)"><span class="slider"></span></label>
-                </div>
-                <div class="feature-item">
-                    <span>No Recoil</span>
-                    <label class="switch"><input type="checkbox" onchange="sendProxyCommand('No Recoil', this)"><span class="slider"></span></label>
+                    <span>ESP 3D Box</span>
+                    <label class="switch"><input type="checkbox" id="espToggle" onchange="sendRemoteCommand('ESP_Box', this.checked)"><span class="slider"></span></label>
                 </div>
             </div>
 
@@ -81,19 +88,19 @@
     </div>
 
     <script>
-        function checkProxyAndLogin() {
+        function checkLogin() {
             const key = document.getElementById('accessKey').value.trim();
             if (!key) {
-                alert('Digite uma key válida.');
+                alert('Insira uma key válida.');
                 return;
             }
             document.getElementById('connectionScreen').classList.add('hidden');
             document.getElementById('dashboardPanel').classList.remove('hidden');
         }
 
-        function sendProxyCommand(featureName, element) {
-            const estado = element.checked ? 'LIGADO' : 'DESLIGADO';
-            console.log(`[Túnel Proxy] Comando disparado -> ${featureName}: ${estado}`);
+        function sendRemoteCommand(feature, state) {
+            console.log(`[Remote Enivardo] ${feature} -> ${state}`);
+            // Aqui é onde o comando via WebSocket ou API é disparado para o script do jogo
         }
 
         function logout() {
