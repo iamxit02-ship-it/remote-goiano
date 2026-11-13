@@ -50,24 +50,24 @@
     <div class="box">
         <div id="connectionScreen">
             <h2>Remote Goiano</h2>
-            <div id="proxyStatus" class="status-badge status-disconnected">Aguardando Conexão</div>
+            <div id="proxyStatus" class="status-badge status-disconnected">Aguardando WebSocket</div>
             <p style="color: var(--muted); font-size: 0.85rem; margin-bottom: 1rem;">Insira sua Key de acesso:</p>
             <input type="text" id="accessKey" placeholder="Cole sua Key aqui...">
-            <button onclick="checkLogin()">Conectar Painel</button>
+            <button onclick="connectWebSocket()">Conectar Painel</button>
         </div>
 
         <div id="dashboardPanel" class="hidden">
             <h2>Mogado Sports Core</h2>
-            <div class="status-badge status-connected" style="margin-top: 0.5rem;">Remote Sincronizado</div>
+            <div id="netStatus" class="status-badge status-connected" style="margin-top: 0.5rem;">WebSocket Conectado</div>
             
             <div class="feature-grid">
                 <div class="feature-item">
                     <span>Aimbot FOV</span>
-                    <label class="switch"><input type="checkbox" id="aimbotToggle" onchange="sendRemoteCommand('Aimbot', this.checked)"><span class="slider"></span></label>
+                    <label class="switch"><input type="checkbox" onchange="sendRemoteCommand('Aimbot', this.checked)"><span class="slider"></span></label>
                 </div>
                 <div class="control-group">
                     <label>Tamanho do FOV</label>
-                    select id="fovSize" onchange="sendRemoteCommand('FOV_Size', this.value)">
+                    <select id="fovSize" onchange="sendRemoteCommand('FOV_Size', this.value)">
                         <option value="baixo">Baixo</option>
                         <option value="medio">Médio</option>
                         <option value="alto">Alto</option>
@@ -75,11 +75,11 @@
                 </div>
                 <div class="feature-item">
                     <span>ESP Chams (Laranja)</span>
-                    <label class="switch"><input type="checkbox" id="chamsToggle" onchange="sendRemoteCommand('Chams', this.checked)"><span class="slider"></span></label>
+                    <label class="switch"><input type="checkbox" onchange="sendRemoteCommand('Chams', this.checked)"><span class="slider"></span></label>
                 </div>
                 <div class="feature-item">
                     <span>ESP 3D Box</span>
-                    <label class="switch"><input type="checkbox" id="espToggle" onchange="sendRemoteCommand('ESP_Box', this.checked)"><span class="slider"></span></label>
+                    <label class="switch"><input type="checkbox" onchange="sendRemoteCommand('ESP_Box', this.checked)"><span class="slider"></span></label>
                 </div>
             </div>
 
@@ -88,22 +88,56 @@
     </div>
 
     <script>
-        function checkLogin() {
+        let ws;
+
+        function connectWebSocket() {
             const key = document.getElementById('accessKey').value.trim();
             if (!key) {
                 alert('Insira uma key válida.');
                 return;
             }
-            document.getElementById('connectionScreen').classList.add('hidden');
-            document.getElementById('dashboardPanel').classList.remove('hidden');
+
+            // Endereço do servidor WebSocket de teste gratuito (ou o seu backend próprio)
+            // Exemplo usando um servidor público de eco/teste WebSocket:
+            const wsUrl = "wss://echo.websocket.events/.ws"; 
+
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = function() {
+                console.log("[WebSocket] Conectado com sucesso!");
+                document.getElementById('connectionScreen').classList.add('hidden');
+                document.getElementById('dashboardPanel').classList.remove('hidden');
+                // Envia a chave de autenticação inicial
+                ws.send(JSON.stringify({ type: 'AUTH', key: key }));
+            };
+
+            ws.onerror = function(error) {
+                alert('Erro ao conectar ao WebSocket do remote.');
+                console.error(error);
+            };
+
+            ws.onclose = function() {
+                document.getElementById('netStatus').className = 'status-badge status-disconnected';
+                document.getElementById('netStatus').innerText = 'Desconectado';
+            };
         }
 
         function sendRemoteCommand(feature, state) {
-            console.log(`[Remote Enivardo] ${feature} -> ${state}`);
-            // Aqui é onde o comando via WebSocket ou API é disparado para o script do jogo
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                const payload = JSON.stringify({
+                    action: feature,
+                    value: state,
+                    timestamp: Date.now()
+                });
+                ws.send(payload);
+                console.log(`[Comando Enviado] ${feature} -> ${state}`);
+            } else {
+                alert('WebSocket desconectado!');
+            }
         }
 
         function logout() {
+            if (ws) ws.close();
             document.getElementById('dashboardPanel').classList.add('hidden');
             document.getElementById('connectionScreen').classList.remove('hidden');
             document.getElementById('accessKey').value = '';
