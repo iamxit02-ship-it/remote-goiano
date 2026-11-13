@@ -3,145 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Remote Goiano — Painel Oficial</title>
+    <title>Painel Remote Goiano</title>
     <style>
-        :root {
-            --bg: #090d16;
-            --card: #131b2e;
-            --accent: #38bdf8;
-            --text: #f8fafc;
-            --muted: #64748b;
-            --border: #1e293b;
-            --red: #ef4444;
-            --green: #22c55e;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
-        body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem; }
-
-        .box { width: 100%; max-width: 420px; background: var(--card); padding: 2rem; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center; }
-        
-        .status-badge { display: inline-block; padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: bold; margin-bottom: 1.5rem; }
-        .status-disconnected { background: rgba(239, 68, 68, 0.15); color: var(--red); border: 1px solid var(--red); }
-        .status-connected { background: rgba(34, 197, 94, 0.15); color: var(--green); border: 1px solid var(--green); }
-
-        input, button, select { width: 100%; padding: 0.75rem; margin-top: 0.75rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 1rem; outline: none; }
-        input:focus, select:focus { border-color: var(--accent); }
-        button { background: var(--accent); color: var(--bg); font-weight: bold; cursor: pointer; border: none; transition: opacity 0.2s; }
-        button:hover { opacity: 0.9; }
-
-        .hidden { display: none; }
-
-        .feature-grid { display: grid; gap: 0.75rem; margin-top: 1rem; text-align: left; }
-        .feature-item { display: flex; justify-content: space-between; align-items: center; background: var(--bg); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border); }
-        .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border); transition: .3s; border-radius: 24px; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: var(--text); transition: .3s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--accent); }
-        input:checked + .slider:before { transform: translateX(22px); }
-        
-        .control-group { margin-top: 1rem; text-align: left; font-size: 0.9rem; }
-        .control-group label { color: var(--muted); display: block; margin-bottom: 0.25rem; }
+        body { background-color: #121212; color: #fff; font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        .btn { background-color: #ff4757; color: white; border: none; padding: 15px 25px; font-size: 18px; margin: 10px; border-radius: 8px; cursor: pointer; width: 80%; max-width: 300px; }
+        .btn:active { background-color: #ff6b81; }
     </style>
 </head>
 <body>
 
-    <div class="box">
-        <div id="connectionScreen">
-            <h2>Remote Goiano</h2>
-            <div id="proxyStatus" class="status-badge status-disconnected">Aguardando WebSocket</div>
-            <p style="color: var(--muted); font-size: 0.85rem; margin-bottom: 1rem;">Insira sua Key de acesso:</p>
-            <input type="text" id="accessKey" placeholder="Cole sua Key aqui...">
-            <button onclick="connectWebSocket()">Conectar Painel</button>
-        </div>
+    <h2>Painel de Controle</h2>
+    <p>Status: <span id="status" style="color: yellow;">Conectando...</span></p>
 
-        <div id="dashboardPanel" class="hidden">
-            <h2>Mogado Sports Core</h2>
-            <div id="netStatus" class="status-badge status-connected" style="margin-top: 0.5rem;">WebSocket Conectado</div>
-            
-            <div class="feature-grid">
-                <div class="feature-item">
-                    <span>Aimbot FOV</span>
-                    <label class="switch"><input type="checkbox" onchange="sendRemoteCommand('Aimbot', this.checked)"><span class="slider"></span></label>
-                </div>
-                <div class="control-group">
-                    <label>Tamanho do FOV</label>
-                    <select id="fovSize" onchange="sendRemoteCommand('FOV_Size', this.value)">
-                        <option value="baixo">Baixo</option>
-                        <option value="medio">Médio</option>
-                        <option value="alto">Alto</option>
-                    </select>
-                </div>
-                <div class="feature-item">
-                    <span>ESP Chams (Laranja)</span>
-                    <label class="switch"><input type="checkbox" onchange="sendRemoteCommand('Chams', this.checked)"><span class="slider"></span></label>
-                </div>
-                <div class="feature-item">
-                    <span>ESP 3D Box</span>
-                    <label class="switch"><input type="checkbox" onchange="sendRemoteCommand('ESP_Box', this.checked)"><span class="slider"></span></label>
-                </div>
-            </div>
-
-            <button onclick="logout()" style="background: transparent; color: var(--muted); border: 1px solid var(--border); margin-top: 1.5rem;">Desconectar</button>
-        </div>
+    <div>
+        <button class="btn" onclick="enviarComando('Aimbot', 'ON')">Ativar Aimbot</button>
+        <button class="btn" onclick="enviarComando('ESP', 'ON')">Ativar ESP</button>
+        <button class="btn" onclick="enviarComando('Funcoes', 'OFF')">Desativar Tudo</button>
     </div>
 
     <script>
+        // Endereço do WebSocket apontando direto para o seu Termux
+        const wsUrl = "ws://192.168.77.35:8765";
         let ws;
 
-        function connectWebSocket() {
-            const key = document.getElementById('accessKey').value.trim();
-            if (!key) {
-                alert('Insira uma key válida.');
-                return;
-            }
-
-            // Endereço do servidor WebSocket de teste gratuito (ou o seu backend próprio)
-            // Exemplo usando um servidor público de eco/teste WebSocket:
-            const wsUrl = "wss://echo.websocket.events/.ws"; 
-
+        function conectar() {
             ws = new WebSocket(wsUrl);
 
             ws.onopen = function() {
-                console.log("[WebSocket] Conectado com sucesso!");
-                document.getElementById('connectionScreen').classList.add('hidden');
-                document.getElementById('dashboardPanel').classList.remove('hidden');
-                // Envia a chave de autenticação inicial
-                ws.send(JSON.stringify({ type: 'AUTH', key: key }));
-            };
-
-            ws.onerror = function(error) {
-                alert('Erro ao conectar ao WebSocket do remote.');
-                console.error(error);
+                document.getElementById("status").innerText = "Conectado!";
+                document.getElementById("status").style.color = "lime";
             };
 
             ws.onclose = function() {
-                document.getElementById('netStatus').className = 'status-badge status-disconnected';
-                document.getElementById('netStatus').innerText = 'Desconectado';
+                document.getElementById("status").innerText = "Desconectado. Tentando reconectar...";
+                document.getElementById("status").style.color = "red";
+                setTimeout(conectar, 3000);
             };
         }
 
-        function sendRemoteCommand(feature, state) {
+        function enviarComando(action, value) {
             if (ws && ws.readyState === WebSocket.OPEN) {
-                const payload = JSON.stringify({
-                    action: feature,
-                    value: state,
-                    timestamp: Date.now()
-                });
-                ws.send(payload);
-                console.log(`[Comando Enviado] ${feature} -> ${state}`);
+                const dados = JSON.stringify({ action: action, value: value });
+                ws.send(dados);
+                alert("Comando enviado: " + action);
             } else {
-                alert('WebSocket desconectado!');
+                alert("Erro: O painel não está conectado ao Termux!");
             }
         }
 
-        function logout() {
-            if (ws) ws.close();
-            document.getElementById('dashboardPanel').classList.add('hidden');
-            document.getElementById('connectionScreen').classList.remove('hidden');
-            document.getElementById('accessKey').value = '';
-        }
+        conectar();
     </script>
+
 </body>
 </html>
